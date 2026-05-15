@@ -1,8 +1,15 @@
 # 我让AI做的日志查看器
+
+https://github.com/crazypeace/VLESS-cracker/blob/main/vless-analyzer.html  
+
 ```
 学习和分析这个项目 https://github.com/Anonymous376c1d0cf28/VLESS-cracker 
 对于像这样的测试日志, 制作一个单HTML页面的分析工具
 ```
+
+# 手搓复现实验
+
+https://github.com/crazypeace/VLESS-cracker/blob/main/%E6%B5%8B%E8%AF%95%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95.md
 
 # 以下是原项目README
 
