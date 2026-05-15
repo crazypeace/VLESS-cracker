@@ -1,4 +1,6 @@
 // 用 mimo-v2.5-pro 修改的, 我自己不懂代码 by ǝɔ∀ǝdʎz∀ɹɔ 👽
+// 编译方法
+// gcc -O2 -o probe-18-poc probe-18-mimo.c -lpcap -lpthread
 
 // probe-18-mimo.c — Modified from vless-cracker-v1.c
 // Modification: PROBE-FIRST mode
