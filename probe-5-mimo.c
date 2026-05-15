@@ -1,3 +1,12 @@
+// 用 mimo-v2.5-pro 修改的, 我自己不懂代码 by ǝɔ∀ǝdʎz∀ɹɔ 👽
+// 编译方法
+// gcc -O2 -o probe-5-poc probe-5-mimo.c -lpcap -lpthread
+
+// probe-5-mimo.c — Modified from vless-cracker-v1.c
+// 唯一差异：
+// - #define MAX_PROBE_BYTES 4096
+// + #define MAX_PROBE_BYTES 32768
+
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <errno.h>
