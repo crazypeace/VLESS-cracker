@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLESS-cracker 日志分析工具</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --border-color: #374151;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+
+        .btn:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn-green { background: var(--accent-green); }
+        .btn-green:hover { background: #059669; }
+        .btn-orange { background: var(--accent-orange); }
+        .btn-orange:hover { background: #d97706; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        tr:hover { background: rgba(59, 130, 246, 0.1); }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-alert { background: var(--accent-red); color: white; }
+
+        .probe-table { max-height: 500px; overflow-y: auto; }
+
+        .diff-highlight {
+            background: rgba(239, 68, 68, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- 输入日志数据 -->
+        <div class="card">
+            <div class="card-title">
+                <span>📥</span>
+                <span>输入日志数据</span>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 10px; font-size: 0.9rem;">
+                粘贴 VLESS-cracker 测试日志或上传 .log 文件
+            </p>
+            <textarea id="logInput" placeholder="[2026-05-14 13:57:43.441506] TLS ClientHello 172.17.0.1:37060 -> 172.17.0.2:8443 sni=learn.microsoft.com alpn=h2,http/1.1 versions=0x6a6a,0x0304,0x0303&#10;TLS ServerHello 172.17.0.2:8443 -> 172.17.0.1:37060 selected_version=0x0304 bytes=5182&#10;TLS replay attempt=1 server=172.17.0.2:8443&#10;..."></textarea>
+            <div style="margin-top: 15px;">
+                <button class="btn" onclick="parseLogs()">📊 分析日志</button>
+                <button class="btn btn-green" onclick="loadSample()">📋 加载示例</button>
+                <button class="btn btn-orange" onclick="clearAll()">🗑️ 清空</button>
+                <label style="margin-left: 10px;">
+                    <input type="file" id="fileInput" accept=".log,.txt" style="display: none;" onchange="loadFile(event)">
+                    <span class="btn" style="cursor: pointer;">📁 打开文件</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 探针详细数据 -->
+        <div class="card">
+            <div class="card-title">
+                <span>📋</span>
+                <span>探针详细数据</span>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 10px; font-size: 0.85rem;">
+                包含原始响应状态（ALERT等）和字节差异分析
+            </p>
+            <div class="probe-table">
+                <table id="probeTable">
+                    <thead>
+                        <tr>
+                            <th>探针</th>
+                            <th>轮次1状态</th>
+                            <th>轮次1字节</th>
+                            <th>轮次2状态</th>
+                            <th>轮次2字节</th>
+                            <th>Δ</th>
+                            <th>结论</th>
+                        </tr>
+                    </thead>
+                    <tbody id="probeTableBody">
+                        <tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                            暂无数据，请先分析日志
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let parsedData = { clientHello: null, serverHello: null, attempts: new Map(), probes: [] };
+
+        const SAMPLE_LOG = `[2026-05-14 13:57:43.441506] TLS ClientHello 172.17.0.1:37060 -> 172.17.0.2:8443 sni=learn.microsoft.com alpn=h2,http/1.1 versions=0x6a6a,0x0304,0x0303
+TLS ServerHello 172.17.0.2:8443 -> 172.17.0.1:37060 selected_version=0x0304 bytes=5182
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=1 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=1 probe=1 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=2 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=1 probe=2 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5205
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=3 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=1 probe=3 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5205
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=4 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=1 probe=4 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=5 server=172.17.0.2:8443 sent probe bytes=9
+TLS replay attempt=1 probe=5 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5205
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=6 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=1 probe=6 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5206
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=7 server=172.17.0.2:8443 sent probe bytes=8
+TLS replay attempt=1 probe=7 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5206
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=8 server=172.17.0.2:8443 sent probe bytes=15
+TLS replay attempt=1 probe=8 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=9 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=1 probe=9 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=10 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=1 probe=10 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204
+TLS replay B randomized ClientHello legacy_session_id len=32 before=4b5fdc97 after=4c7c909c
+TLS replay waiting 1s before attempt=B randomized session_id recheck
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=1 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=2 probe=1 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=2 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=2 probe=2 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5205
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=3 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=2 probe=3 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5205
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=4 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=2 probe=4 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204
+TLS replay attempt=2 server=172.17.0.2:8443 sent probe bytes=9
+TLS replay attempt=2 probe=5 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5205
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=6 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=2 probe=6 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5205
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=7 server=172.17.0.2:8443 sent probe bytes=8
+TLS replay attempt=2 probe=7 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=8 server=172.17.0.2:8443 sent probe bytes=15
+TLS replay attempt=2 probe=8 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=9 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=2 probe=9 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5206
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=10 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=2 probe=10 server=172.17.0.2:8443 complete probe_status=ALERT bytes=5204`;
+
+        function loadSample() {
+            document.getElementById('logInput').value = SAMPLE_LOG;
+            parseLogs();
+        }
+
+        function clearAll() {
+            document.getElementById('logInput').value = '';
+            document.getElementById('probeTableBody').innerHTML =
+                '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 40px;">暂无数据，请先分析日志</td></tr>';
+        }
+
+        function loadFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('logInput').value = e.target.result;
+                parseLogs();
+            };
+            reader.readAsText(file);
+        }
+
+        function parseLogs() {
+            const logText = document.getElementById('logInput').value.trim();
+            if (!logText) { alert('请输入日志数据'); return; }
+
+            parsedData = parseLogText(logText);
+            if (parsedData.probes.length === 0) {
+                alert('未找到有效的日志条目，请检查格式');
+                return;
+            }
+
+            updateProbeTable();
+        }
+
+        function parseLogText(text) {
+            const lines = text.split('\n');
+            const data = { clientHello: null, serverHello: null, attempts: new Map(), probes: [] };
+
+            const clientHelloRegex = /^\[(.+?)\] TLS ClientHello (\S+):(\d+) -> (\S+):(\d+) sni=(\S+) alpn=(\S+) versions=(.+)$/;
+            const serverHelloRegex = /^TLS ServerHello (\S+):(\d+) -> (\S+):(\d+) selected_version=(\S+) bytes=(\d+)$/;
+            const attemptRegex = /^TLS replay attempt=(\d+) server=(\S+):(\d+)$/;
+            const probeCompleteRegex = /^TLS replay attempt=(\d+) probe=(\d+) server=(\S+):(\d+) complete probe_status=(\S+) bytes=(\d+)$/;
+
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                let match;
+                if ((match = line.match(clientHelloRegex))) {
+                    data.clientHello = { timestamp: match[1], srcIp: match[2], srcPort: parseInt(match[3]), dstIp: match[4], dstPort: parseInt(match[5]), sni: match[6], alpn: match[7] };
+                } else if ((match = line.match(serverHelloRegex))) {
+                    data.serverHello = { srcIp: match[1], srcPort: parseInt(match[2]), dstIp: match[3], dstPort: parseInt(match[4]), selectedVersion: match[5], bytes: parseInt(match[6]) };
+                } else if ((match = line.match(attemptRegex))) {
+                    const num = parseInt(match[1]);
+                    if (!data.attempts.has(num)) data.attempts.set(num, { attemptNum: num, probes: [] });
+                } else if ((match = line.match(probeCompleteRegex))) {
+                    const probeData = { attempt: parseInt(match[1]), probe: parseInt(match[2]), server: match[3] + ':' + match[4], status: match[5], bytes: parseInt(match[6]) };
+                    data.probes.push(probeData);
+                    if (data.attempts.has(probeData.attempt)) data.attempts.get(probeData.attempt).probes.push(probeData);
+                }
+            }
+            return data;
+        }
+
+        function updateProbeTable() {
+            const tbody = document.getElementById('probeTableBody');
+            tbody.innerHTML = '';
+
+            const probeNumbers = [...new Set(parsedData.probes.map(p => p.probe))].sort((a, b) => a - b);
+            const attempt1Map = new Map();
+            const attempt2Map = new Map();
+
+            if (parsedData.attempts.has(1)) parsedData.attempts.get(1).probes.forEach(p => attempt1Map.set(p.probe, p));
+            if (parsedData.attempts.has(2)) parsedData.attempts.get(2).probes.forEach(p => attempt2Map.set(p.probe, p));
+
+            probeNumbers.forEach(probeNum => {
+                const p1 = attempt1Map.get(probeNum) || { bytes: 'N/A', status: 'N/A' };
+                const p2 = attempt2Map.get(probeNum) || { bytes: 'N/A', status: 'N/A' };
+                const diff = (p1.bytes !== 'N/A' && p2.bytes !== 'N/A') ? (p2.bytes - p1.bytes) : null;
+                const diffClass = diff !== null && diff !== 0 ? 'diff-highlight' : '';
+                const diffText = diff !== null ? (diff > 0 ? '+' + diff : diff) : '-';
+                const statusIcon = (diff !== null && diff !== 0) ? '🔴 差异' : '🟢 一致';
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong style="color: var(--accent-blue);">#${probeNum}</strong></td>
+                    <td><span class="badge badge-alert">${p1.status}</span></td>
+                    <td style="font-family: monospace; font-size: 14px;">${p1.bytes}</td>
+                    <td><span class="badge badge-alert">${p2.status}</span></td>
+                    <td style="font-family: monospace; font-size: 14px;">${p2.bytes}</td>
+                    <td class="${diffClass}" style="font-weight: 600; color: ${diff > 0 ? '#ef4444' : (diff < 0 ? '#3b82f6' : 'inherit')};">${diffText}</td>
+                    <td>${statusIcon}</td>
+                `;
+            });
+
+            if (attempt1Map.size > 0 && attempt2Map.size > 0) {
+                const successCount = probeNumbers.filter(num => {
+                    const p1 = attempt1Map.get(num);
+                    const p2 = attempt2Map.get(num);
+                    return p1 && p2 && p1.bytes !== 'N/A' && p2.bytes !== 'N/A' && p1.bytes === p2.bytes;
+                }).length;
+                const diffCount = probeNumbers.length - successCount;
+                const summaryRow = tbody.insertRow();
+                summaryRow.style.background = 'rgba(59, 130, 246, 0.1)';
+                summaryRow.innerHTML = `
+                    <td colspan="7" style="text-align: center; padding: 8px; color: var(--accent-blue); font-weight: 600;">
+                        汇总: ${successCount} 个探针一致 | ${diffCount} 个探针存在差异 | 总计 ${probeNumbers.length} 个探针
+                    </td>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
