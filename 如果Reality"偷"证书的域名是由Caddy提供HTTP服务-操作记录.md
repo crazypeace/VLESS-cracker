@@ -21,7 +21,7 @@ rntnt.whatcanisay.ggff.net
 curl -LO https://github.com/crazypeace/xray-vless-reality/raw/main/install.sh || wget -O ${_##*/} $_ && bash install.sh 4 8443 rntnt.whatcanisay.ggff.net
 ```
 
-# 3. 在Docker中搭一个 Reality服务端, 使用宿主机的 Reality服务端 同样的内核和配置
+# 3. 在Docker中搭一个 Reality服务端, 使用宿主机的 Reality服务端 同样的内核和配置文件
 ```
 docker run -d \
   --name reality-server \
