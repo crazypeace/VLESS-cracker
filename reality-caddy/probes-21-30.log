@@ -1,0 +1,66 @@
+root@rn-trt:~/VLESS-cracker-my# ./vless-cracker-v1      -i docker0      -f "tcp port 8443 and host 172.17.0.1 and host 172.17.0.2"        -P probes-21-30.txt     -l info
+[2026-05-16 11:01:25.039402] TLS ClientHello 172.17.0.1:38706 -> 172.17.0.2:8443 sni=rntnt.whatcanisay.ggff.net alpn=h2,http/1.1 versions=0xfafa,0x0304,0x0303
+TLS ServerHello 172.17.0.2:8443 -> 172.17.0.1:38706 selected_version=0x0304 bytes=3647
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 server=172.17.0.2:8443
+TLS replay attempt=1 probe=10 server=172.17.0.2:8443 sent probe bytes=6
+TLS replay attempt=1 probe=10 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3670
+TLS replay attempt=1 probe=9 server=172.17.0.2:8443 sent probe bytes=24
+TLS replay attempt=1 probe=9 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay attempt=1 probe=3 server=172.17.0.2:8443 sent probe bytes=7
+TLS replay attempt=1 probe=3 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay attempt=1 probe=5 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=1 probe=5 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3670
+TLS replay attempt=1 probe=2 server=172.17.0.2:8443 sent probe bytes=9
+TLS replay attempt=1 probe=2 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay attempt=1 probe=6 server=172.17.0.2:8443 sent probe bytes=8
+TLS replay attempt=1 probe=6 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay attempt=1 probe=7 server=172.17.0.2:8443 sent probe bytes=18
+TLS replay attempt=1 probe=7 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay attempt=1 probe=4 server=172.17.0.2:8443 sent probe bytes=7
+TLS replay attempt=1 probe=4 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay attempt=1 probe=8 server=172.17.0.2:8443 sent probe bytes=17
+TLS replay attempt=1 probe=8 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3670
+TLS replay attempt=1 probe=1 server=172.17.0.2:8443 sent probe bytes=6
+TLS replay attempt=1 probe=1 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay B randomized ClientHello legacy_session_id len=32 before=9765cfc0 after=b4f2843c
+TLS replay waiting 1s before attempt=B randomized session_id recheck
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 server=172.17.0.2:8443
+TLS replay attempt=2 probe=3 server=172.17.0.2:8443 sent probe bytes=7
+TLS replay attempt=2 probe=2 server=172.17.0.2:8443 sent probe bytes=9
+TLS replay attempt=2 probe=6 server=172.17.0.2:8443 sent probe bytes=8
+TLS replay attempt=2 probe=1 server=172.17.0.2:8443 sent probe bytes=6
+TLS replay attempt=2 probe=4 server=172.17.0.2:8443 sent probe bytes=7
+TLS replay attempt=2 probe=7 server=172.17.0.2:8443 sent probe bytes=18
+TLS replay attempt=2 probe=9 server=172.17.0.2:8443 sent probe bytes=24
+TLS replay attempt=2 probe=8 server=172.17.0.2:8443 sent probe bytes=17
+TLS replay attempt=2 probe=10 server=172.17.0.2:8443 sent probe bytes=6
+TLS replay attempt=2 probe=10 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3672
+TLS replay attempt=2 probe=9 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3672
+TLS replay attempt=2 probe=8 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3672
+TLS replay attempt=2 probe=7 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3672
+TLS replay attempt=2 probe=4 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3672
+TLS replay attempt=2 probe=5 server=172.17.0.2:8443 sent probe bytes=10
+TLS replay attempt=2 probe=5 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay attempt=2 probe=3 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3670
+TLS replay attempt=2 probe=1 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay attempt=2 probe=6 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3672
+TLS replay attempt=2 probe=2 server=172.17.0.2:8443 complete probe_status=ALERT bytes=3671
+TLS replay confirmation failed; excluding server=172.17.0.2:8443 round=1
