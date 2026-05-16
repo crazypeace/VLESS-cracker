@@ -130,7 +130,7 @@ curl -x socks://127.0.0.1:1080 google.com
 `probes-21-30.txt`  
 是 [issue 29](https://github.com/Anonymous376c1d0cf28/VLESS-cracker/issues/29) 的30个探针.  
 其中, 第5, 18, 30号探针情况特殊, 需要单独测试. 在 `probes-*-*.txt` 文件中, 对应的位置填充了数据占位.  
-也就是说, 当你使用 `probes-1-10.txt` `probes-11-20.txt` `probes-21-30.txt` 进行测试时, 并没有正确地实施 第5, 18, 30号探针
+也就是说, 当你使用 `probes-1-10.txt` `probes-11-20.txt` `probes-21-30.txt` 进行测试时, 并没有按issue29作者的构思正确地实施 第5, 18, 30号探针
 
 `probe-5-16385.txt`  
 用原poc程序, 会因为探针体积大报错"probe file 'probe-5-16385.txt' line 1 is too long"   
