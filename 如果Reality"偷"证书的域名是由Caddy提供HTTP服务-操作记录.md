@@ -31,6 +31,11 @@ docker run -d \
   ghcr.io/xtls/xray-core:latest 
 ```
 
+查询 Docker 的IP地址
+```
+docker ps -q | xargs docker inspect -f '{{.Name}} -> {{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
+```
+
 # 4. 运行 Reality客户端 对接Docker中的服务端
 reality-client.json
 ```
