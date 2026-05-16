@@ -114,6 +114,7 @@ reality-client.json
 ```
 
 # 6. 发起Reality数据包
+用 curl 调用Reality客户端生成的 socks 代理. 这样 Reality客户端 会发起Reality数据包
 ```
 curl -x socks://127.0.0.1:1080 google.com
 ```
